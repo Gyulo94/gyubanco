@@ -15,7 +15,8 @@ public enum ErrorCode implements ErrorCodeInterface {
   FORBIDDEN(HttpStatus.FORBIDDEN.value(), "접근이 거부되었습니다."),
   INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다."),
   NOT_FOUND(HttpStatus.NOT_FOUND.value(), "요청하신 리소스를 찾을 수 없습니다."),
-  ;
+
+  DUPLICATE_EMAIL(HttpStatus.CONFLICT.value(), "이미 존재하는 이메일입니다.");
 
   private final Integer httpStatusCode;
   private final String message;
