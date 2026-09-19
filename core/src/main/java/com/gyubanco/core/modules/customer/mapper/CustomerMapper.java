@@ -11,4 +11,6 @@ public interface CustomerMapper {
 
   boolean existsByEmail(String email);
 
+  Customer getById(Long id);
+
 }

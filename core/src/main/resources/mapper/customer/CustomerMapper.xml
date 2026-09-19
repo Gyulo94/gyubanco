@@ -5,7 +5,7 @@
 
 <mapper namespace="com.gyubanco.core.modules.customer.mapper.CustomerMapper">
 
-  <insert id="insertCustomer" parameterType="CustomerCreateRequest" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+  <insert id="insertCustomer" parameterType="Customer" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
     INSERT INTO customer (name, email)
     VALUES (#{name}, #{email})
   </insert>
@@ -16,6 +16,13 @@
         FROM customer
         WHERE email = #{email}
     )
+  </select>
+
+
+  <select id="getById" parameterType="Long" resultType="Customer">
+    SELECT *
+    FROM customer
+    WHERE id = #{id}
   </select>
 
 </mapper>

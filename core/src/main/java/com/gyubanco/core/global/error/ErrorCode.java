@@ -16,7 +16,15 @@ public enum ErrorCode implements ErrorCodeInterface {
   INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다."),
   NOT_FOUND(HttpStatus.NOT_FOUND.value(), "요청하신 리소스를 찾을 수 없습니다."),
 
-  DUPLICATE_EMAIL(HttpStatus.CONFLICT.value(), "이미 존재하는 이메일입니다.");
+  // 고객 관련
+  DUPLICATE_EMAIL(HttpStatus.CONFLICT.value(), "이미 존재하는 이메일입니다."),
+  CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "해당 고객 정보를 찾을 수 없습니다."),
+
+  // 계좌 관련
+  ACCOUNT_NUMBER_LIMIT_EXCEEDED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "계좌번호 발급 범위를 초과했습니다."),
+  UNSUPPORTED_ACCOUNT_TYPE(HttpStatus.BAD_REQUEST.value(), "지원되지 않는 계좌 유형입니다.");
+
+  ;
 
   private final Integer httpStatusCode;
   private final String message;
