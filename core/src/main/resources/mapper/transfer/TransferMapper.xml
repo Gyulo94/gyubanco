@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gyubanco.core.modules.transfer.mapper.TransferMapper">
+
+<resultMap id="transferResultMap"
+          type="Transfer"
+          >
+  <id property="id" column="id"/>
+  <result property="requestId" column="request_id"/>
+  <result property="depositAccountId" column="deposit_account_id"/>
+  <result property="withdrawalAccountId" column="withdrawal_account_id"/>
+  <result property="amount" column="amount"/>
+  <result property="createdAt" column="created_at"/>
+</resultMap>
+
+  <select id="insertTransfer" parameterType="Transfer" resultMap="transferResultMap"  affectData="true">
+    INSERT INTO transfer (request_id, deposit_account_id, withdrawal_account_id, amount)
+    VALUES (#{requestId}, #{depositAccountId}, #{withdrawalAccountId}, #{amount})
+    RETURNING id, request_id, deposit_account_id, withdrawal_account_id, amount, created_at
+  </select>
+
+  <select id="getByRequestId" parameterType="java.util.UUID" resultMap="transferResultMap">
+    SELECT id, request_id, deposit_account_id, withdrawal_account_id, amount, created_at
+    FROM transfer
+    WHERE request_id = #{requestId}
+  </select>
+
+</mapper>

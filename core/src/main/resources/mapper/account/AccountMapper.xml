@@ -17,14 +17,38 @@
   <result property="status" column="status"/>
 </resultMap>
 
+<!-- 계좌 생성 -->
   <select id="insertAccount" parameterType="Account" resultMap="accountResultMap"  affectData="true">
     INSERT INTO account (customer_id, account_number, account_type)
     VALUES (#{customerId}, #{accountNumber}, #{accountType})
     RETURNING id, customer_id, account_number, account_type, balance, created_at, status
   </select>
 
+<!-- 다음 계좌 번호 시퀀스 가져오기 -->
   <select id="getNextAccountNumberSequence" resultType="long">
     SELECT nextval('account_number_seq')
   </select>
+
+<!-- 계좌 ID로 조회 -->
+    <select id="getById" parameterType="Long" resultMap="accountResultMap">
+    SELECT *
+    FROM account
+    WHERE id = #{accountId}
+  </select>
+
+<!-- 계좌 잔액 이체 (조건부 원자적 UPDATE) -->
+  <update id="transferBalance">
+    UPDATE account
+    SET balance = balance + CASE
+      WHEN id = #{depositAccountId} THEN #{amount}
+      WHEN id = #{withdrawalAccountId} THEN -#{amount}
+    END
+    WHERE id IN (#{depositAccountId}, #{withdrawalAccountId})
+      AND status = 'ACTIVE'
+      AND (
+        id = #{depositAccountId}
+        OR balance >= #{amount}
+      )
+  </update>
 
 </mapper>
