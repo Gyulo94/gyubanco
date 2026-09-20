@@ -30,18 +30,18 @@ public class TransferExecutor {
 
     // 입금 계좌 조회
     Account depositAccount = getDepositAccount(
-        request.getDepositAccountId());
+        request.getDepositAccountNumber());
 
     // 출금 계좌 조회
     Account withdrawalAccount = getWithdrawalAccount(
-        request.getWithdrawalAccountId());
+        request.getWithdrawalAccountNumber());
 
     // 출금 계좌 검증
     validateWithdrawalAccount(withdrawalAccount, request.getAmount());
 
     // 이체 기록 생성
     Transfer transfer = transferMapper.insertTransfer(
-        TransferRequest.toModel(request));
+        TransferRequest.toModel(request, depositAccount.getId(), withdrawalAccount.getId()));
 
     // 계좌 잔액 업데이트
     transferBalance(
@@ -58,8 +58,8 @@ public class TransferExecutor {
   private void validateDifferentAccounts(TransferRequest request) {
 
     // 입금 계좌와 출금 계좌가 동일한지 확인
-    if (request.getDepositAccountId()
-        .equals(request.getWithdrawalAccountId())) {
+    if (request.getDepositAccountNumber()
+        .equals(request.getWithdrawalAccountNumber())) {
 
       // 동일한 계좌로의 이체는 허용되지 않음
       throw new ApiException(
@@ -68,10 +68,10 @@ public class TransferExecutor {
   }
 
   // 입금 계좌 조회 메서드
-  private Account getDepositAccount(Long accountId) {
+  private Account getDepositAccount(String accountNumber) {
 
     // 입금 계좌 조회
-    Account account = accountMapper.getById(accountId);
+    Account account = accountMapper.getByAccountNumber(accountNumber);
 
     // 입금 계좌가 존재하지 않으면 예외 발생
     if (account == null) {
@@ -84,10 +84,12 @@ public class TransferExecutor {
   }
 
   // 출금 계좌 조회 메서드
-  private Account getWithdrawalAccount(Long accountId) {
+  private Account getWithdrawalAccount(String accountNumber) {
 
     // 출금 계좌 조회
-    Account account = accountMapper.getById(accountId);
+    Account account = accountMapper.getByAccountNumber(accountNumber);
+
+    System.out.println("Withdrawal account: " + account);
 
     // 출금 계좌가 존재하지 않으면 예외 발생
     if (account == null) {

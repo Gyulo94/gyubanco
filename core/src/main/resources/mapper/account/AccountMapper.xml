@@ -51,4 +51,11 @@
       )
   </update>
 
+  <!-- 계좌번호로 조회-->
+      <select id="getByAccountNumber" parameterType="String" resultMap="accountResultMap">
+    SELECT id, customer_id, account_number, account_type, balance, created_at, status
+    FROM account
+    WHERE account_number = #{accountNumber}
+  </select>
+
 </mapper>

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.gyubanco.core.global.error.ErrorCode;
 import com.gyubanco.core.global.exception.ApiException;
+import com.gyubanco.core.modules.account.mapper.AccountMapper;
+import com.gyubanco.core.modules.account.model.Account;
 import com.gyubanco.core.modules.customer.mapper.CustomerMapper;
 import com.gyubanco.core.modules.customer.model.Customer;
 import com.gyubanco.core.modules.transfer.mapper.TransferMapper;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TransferService {
   private final TransferMapper transferMapper;
   private final TransferExecutor transferExecutor;
+  private final AccountMapper accountMapper;
   private final CustomerMapper customerMapper;
 
   private static final String UNIQUE_VIOLATION = "23505";
@@ -36,6 +39,7 @@ public class TransferService {
       return existing;
     }
 
+    // 요청 검증 전에 기존 이체 요청이 있는지 확인
     validateRequest(request);
 
     try {
@@ -110,23 +114,39 @@ public class TransferService {
   // 이미 존재하는 이체 요청을 확인하는 메서드
   public TransferResponse checkExistingTransfer(TransferRequest request) {
 
-    // 이미 존재하는 이체 요청인지 확인
+    // 기존 이체 요청 조회
     Transfer existingTransfer = transferMapper.getByRequestId(request.getRequestId());
 
-    // 이미 존재하는 이체 요청이 있는 경우 처리
-    if (existingTransfer != null) {
+    // 기존 이체 요청이 존재하지 않으면 null 반환
+    if (existingTransfer == null) {
+      return null;
+    }
 
-      // 요청된 이체와 기존 이체가 동일한지 확인
-      if (existingTransfer.getDepositAccountId().equals(request.getDepositAccountId()) &&
-          existingTransfer.getWithdrawalAccountId().equals(request.getWithdrawalAccountId()) &&
-          existingTransfer.getAmount().equals(request.getAmount())) {
-        // 동일한 이체 요청이 이미 존재하므로 기존 이체 기록을 반환
-        return TransferResponse.fromModel(existingTransfer);
-      }
-      // 요청된 이체와 기존 이체가 다르다면 예외 발생
+    // 입금 계좌와 출금 계좌 조회
+    Account depositAccount = accountMapper.getByAccountNumber(
+        request.getDepositAccountNumber());
+
+    // 출금 계좌 조회
+    Account withdrawalAccount = accountMapper.getByAccountNumber(
+        request.getWithdrawalAccountNumber());
+
+    // 기존 이체 요청과 현재 요청이 동일한지 확인
+    boolean sameRequest = depositAccount != null
+        && withdrawalAccount != null
+        && existingTransfer.getDepositAccountId()
+            .equals(depositAccount.getId())
+        && existingTransfer.getWithdrawalAccountId()
+            .equals(withdrawalAccount.getId())
+        && existingTransfer.getAmount()
+            .equals(request.getAmount());
+
+    // 동일한 요청이 아닌 경우 예외 발생
+    if (!sameRequest) {
       throw new ApiException(ErrorCode.TRANSFER_ALREADY_EXISTS);
     }
-    // 존재하지 않는 이체 요청인 경우 null 반환
-    return null;
+
+    // 동일한 요청인 경우 기존 이체 정보를 반환
+    TransferResponse response = TransferResponse.fromModel(existingTransfer);
+    return response;
   }
 }

@@ -19,4 +19,6 @@ public interface AccountMapper {
       @Param("withdrawalAccountId") Long withdrawalAccountId,
       @Param("amount") Long amount);
 
+  Account getByAccountNumber(String accountNumber);
+
 }
